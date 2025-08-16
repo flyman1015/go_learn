@@ -7,6 +7,7 @@ import (
 	"ginlearn/database"
 	"ginlearn/logger"
 	"ginlearn/middleware"
+	"ginlearn/types"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -65,7 +66,7 @@ func (c *CommentController) CreateComment(ctx *gin.Context) {
 		return
 	}
 
-	var post models.Post
+	var post types.Post
 	if err := database.DB.First(&post, postIDUint).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			ctx.JSON(http.StatusNotFound, gin.H{
@@ -83,7 +84,7 @@ func (c *CommentController) CreateComment(ctx *gin.Context) {
 		return
 	}
 
-	newComment := models.Comment{
+	newComment := types.Comment{
 		Content: commentReq.Content,
 		UserID:  userID,
 		PostID:  uint(postIDUint),
@@ -125,7 +126,7 @@ func (c *CommentController) GetComments(ctx *gin.Context) {
 	}
 	offset := (page - 1) * limit
 
-	var comments []models.Comment
+	var comments []types.Comment
 	result := database.DB.
 		Where("post_id = ?", postID).
 		Preload("User", func(db *gorm.DB) *gorm.DB {
@@ -146,7 +147,7 @@ func (c *CommentController) GetComments(ctx *gin.Context) {
 	}
 
 	var totalCount int64
-	database.DB.Model(&models.Comment{}).
+	database.DB.Model(&types.Comment{}).
 		Where("post_id = ?", postID).
 		Count(&totalCount)
 

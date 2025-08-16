@@ -1,18 +1,17 @@
 package routes
 
 import (
-	"ginlearn/config"
 	"ginlearn/controllers"
 	"ginlearn/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(router *gin.Engine, cfg *config.Config) {
+func SetupRoutes(router *gin.Engine) {
 	// 创建控制器实例
-	authController := controllers.NewUserController(cfg)
-	postController := controllers.NewPostController()
-	commentController := controllers.NewCommentController()
+	authController := controllers.NewUserController()       // 假设 UserController 包含注册和登录方法
+	postController := controllers.NewPostController()       // 假设 PostController 包含文章相关方法
+	commentController := controllers.NewCommentController() // 假设 CommentController 包含评论相关方法
 
 	// ===== 不需要认证的路由 =====
 	apiPublic := router.Group("/api")
@@ -28,7 +27,7 @@ func SetupRoutes(router *gin.Engine, cfg *config.Config) {
 	}
 
 	// ===== 需要认证的路由 =====
-	apiPrivate := apiPublic.Use(middleware.JWTUserMiddleware(cfg))
+	apiPrivate := apiPublic.Use(middleware.JWTUserMiddleware())
 	{
 		// 文章管理
 		apiPrivate.POST("/posts", postController.CreatePost)

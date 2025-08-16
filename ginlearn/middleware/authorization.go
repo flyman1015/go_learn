@@ -6,7 +6,7 @@ import (
 
 	"ginlearn/database"
 	"ginlearn/logger"
-	"ginlearn/models"
+	"ginlearn/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +28,7 @@ func PostOwnershipMiddleware() gin.HandlerFunc {
 		postID := ctx.Param("id")
 
 		// 3. 查询文章
-		var post models.Post
+		var post types.Post
 		if err := database.DB.First(&post, postID).Error; err != nil {
 			logger.Log.Warnf("文章查询失败: %v", err)
 			ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
@@ -79,7 +79,7 @@ func CommentOwnershipMiddleware() gin.HandlerFunc {
 		}
 
 		// 3. 查询评论
-		var comment models.Comment
+		var comment types.Comment
 		if err := database.DB.First(&comment, commentID).Error; err != nil {
 			logger.Log.Warnf("评论查询失败: %v", err)
 			ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{

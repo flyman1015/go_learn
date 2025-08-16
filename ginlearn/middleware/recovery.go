@@ -10,7 +10,10 @@ import (
 
 func RecoveryMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		defer func() {
+			// 使用 recover 捕获 panic 的函数
+			// 如果发生 panic，记录错误信息并返回 500 错误
 			if err := recover(); err != nil {
 				logger.Log.WithFields(logrus.Fields{
 					"path":   c.Request.URL.Path,

@@ -1,49 +1,37 @@
 package main
 
 import (
-	"fmt"
-	"ginlearn/config"
 	"ginlearn/database"
 	"ginlearn/logger"
 	"ginlearn/middleware"
 	"ginlearn/routes"
+	"ginlearn/types"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// 加载配置
-	cfg, err := config.LoadConfig(".")
+
+	//链接数据库初始化表结构
+	db, err := database.InitDb()
+	err = db.AutoMigrate(&types.User{}, &types.Post{}, &types.Comment{})
 	if err != nil {
-		// logger.Log.Fatalf("加载配置失败: %v", err)
-		fmt.Printf("加载配置失败: %v", err)
-		return
-	}
-	// logger.Log.Info("配置加载成功")
-	fmt.Println("配置加载成功")
-
-	logger.InitLogger(&cfg)
-
-	database.InitDB(&cfg)
-	if err := database.DB.AutoMigrate(
-		&models.User{},
-		&models.Post{},
-		&models.Comment{},
-	); err != nil {
 		logger.Log.Fatalf("数据库迁移失败: %v", err)
 	}
 	logger.Log.Info("数据库迁移完成")
 
+	// 创建纯净的 Gin 引擎
 	router := gin.New()
-
+	//自定panic异常中间
 	router.Use(middleware.RecoveryMiddleware())
 
-	// router.Use(middleware.JWTUserMiddleware(&cfg))
+	// router.Use(middleware.JWTUserMiddleware())
 
-	routes.SetupRoutes(router, &cfg)
+	// 设置路由
+	routes.SetupRoutes(router)
 
-	logger.Log.Infof("服务器启动，监听端口 %s", cfg.ServerPort)
-	if err := router.Run(":" + cfg.ServerPort); err != nil {
+	//启动服务
+	if err := router.Run(":8090"); err != nil {
 		logger.Log.Fatalf("服务启动失败: %v", err)
 	}
 
